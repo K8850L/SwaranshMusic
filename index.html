@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Swaransh Musical Night Ticket Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+      body {
+        font-family: "Georgia", serif;
+        background: #f5f5f5;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      header {
+        background: linear-gradient(to right, #4a90e2, #2c3e50);
+        color: white;
+        text-align: center;
+        padding: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      nav {
+        background: linear-gradient(to bottom, #2c3e50, #4a90e2);
+        width: 200px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 2rem;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      }
+      nav a {
+        color: white;
+        margin: 1rem 0;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s;
+      }
+      nav a:hover {
+        color: #d1e3f8;
+      }
+      .container {
+        margin-left: 220px;
+        padding: 2rem;
+        flex-grow: 1;
+      }
+      h1 {
+        text-align: center;
+        color: #333;
+      }
+      form {
+        background: linear-gradient(to bottom, #e3f2fd, #d3e0f5);
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        margin: auto;
+        max-width: 500px;
+      }
+      input,
+      button {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-family: inherit;
+      }
+      input {
+        background: #fff;
+        color: #333;
+      }
+      button {
+        background-color: #5a9bd4;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #4a90e2;
+      }
+      .table-section {
+        margin-top: 40px;
+        background: linear-gradient(to bottom, #d3e0f5, #e3f2fd);
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        text-align: left;
+      }
+      th {
+        background-color: #5a9bd4;
+        color: white;
+      }
+      td {
+        background-color: #fff;
+      }
+      .total-section {
+        text-align: right;
+        margin-top: 20px;
+        font-size: 1.2rem;
+        color: #4a90e2;
+      }
+      .delete-btn {
+        background-color: #e57373;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .delete-btn:hover {
+        background-color: #d32f2f;
+      }
+      .ticket-names {
+        margin-top: 20px;
+      }
+      footer {
+        background: linear-gradient(to right, #4a90e2, #2c3e50);
+        color: white;
+        text-align: center;
+        padding: 1rem 0;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+        box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .download-btn {
+        background: linear-gradient(
+          to right,
+          #a8d5e2,
+          #d3e0f5
+        ); /* Light gradient */
+        color: #333;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 1rem;
+        transition: background 0.3s;
+        border: none;
+        border-radius: 5px;
+      }
+      .download-btn:hover {
+        background: linear-gradient(to right, #d3e0f5, #a8d5e2);
+      }
+      @media (max-width: 768px) {
+        nav {
+          width: 100%;
+          height: auto;
+          position: static;
+          flex-direction: row;
+          justify-content: space-around;
+        }
+        .container {
+          margin-left: 0;
+          padding: 1rem;
+        }
+        form {
+          width: 90%;
+        }
+        input,
+        button {
+          padding: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="#ticketForm">Ticket Form</a>
+      <a href="#ticketTable">Buyer List</a>
+      <a href="#downloadPdf" id="navDownloadPdf">Download Buyers PDF</a>
+      <a href="#downloadCsv" id="navDownloadCsv">Download Buyers CSV</a>
+    </nav>
+    <div class="container">
+      <header>
+        <h1>🎻 Swaransh Musical Night</h1>
+      </header>
+      <section id="ticketForm">
+        <form>
+          <input type="text" placeholder="Name" id="name" required />
+          <input
+            type="text"
+            placeholder="Contact Number"
+            id="contact"
+            required
+          />
+          <input
+            type="number"
+            placeholder="Ticket Count"
+            id="ticketCount"
+            required
+            min="1"
+          />
+          <input
+            type="text"
+            placeholder="Amount Paid (₹)"
+            id="amountPaid"
+            readonly
+          />
+          <div id="ticketNames" class="ticket-names"></div>
+          <button type="submit">Generate Tickets</button>
+        </form>
+      </section>
+
+      <section id="ticketTable" class="table-section">
+        <h2>🎫 Ticket Buyer List</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Buyer</th>
+              <th>Contact</th>
+              <th>Ticket Holder</th>
+              <th>Amount Paid (₹)</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="total-section">
+          Total Tickets Booked: <span id="totalTickets">0</span>
+        </div>
+      </section>
+
+      <button id="downloadPdf" class="download-btn">
+        Download Buyer List as PDF
+      </button>
+      <button id="downloadCsv" class="download-btn">
+        Download Buyer List as CSV
+      </button>
+    </div>
+    <footer>
+      <p>&copy; 2023 Swaransh Musical Night. All rights reserved.</p>
+    </footer>
+
+    <script>
+      const CLIENT_ID = "YOUR_CLIENT_ID.apps.googleusercontent.com";
+      const API_KEY = "YOUR_API_KEY";
+      const DISCOVERY_DOCS = [
+        "https://sheets.googleapis.com/$discovery/rest?version=v4",
+      ];
+      const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+
+      let gapiInited = false;
+      let gisInited = false;
+
+      function gapiLoaded() {
+        gapi.load("client", initializeGapiClient);
+      }
+
+      async function initializeGapiClient() {
+        await gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: DISCOVERY_DOCS,
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+      }
+
+      function gisLoaded() {
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: "", // defined later
+        });
+        gisInited = true;
+        maybeEnableButtons();
+      }
+
+      function maybeEnableButtons() {
+        if (gapiInited && gisInited) {
+          // Enable your buttons here
+        }
+      }
+
+      async function listMajors() {
+        let response;
+        try {
+          response = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: "YOUR_SPREADSHEET_ID",
+            range: "Sheet1!A1:E",
+          });
+        } catch (err) {
+          console.error(err);
+          return;
+        }
+        const range = response.result;
+        if (!range || !range.values || range.values.length == 0) {
+          console.log("No values found.");
+          return;
+        }
+        console.log("Name, Major:");
+        for (const row of range.values) {
+          // Print columns A and E, which correspond to indices 0 and 4.
+          console.log(`${row[0]}, ${row[4]}`);
+        }
+      }
+
+      async function appendRow(values) {
+        const params = {
+          spreadsheetId: "YOUR_SPREADSHEET_ID",
+          range: "Sheet1!A1:E1",
+          valueInputOption: "RAW",
+        };
+
+        const valueRangeBody = {
+          majorDimension: "ROWS",
+          values: [values],
+        };
+
+        try {
+          await gapi.client.sheets.spreadsheets.values.append(
+            params,
+            valueRangeBody
+          );
+          console.log("Row appended.");
+        } catch (err) {
+          console.error(err);
+        }
+      }
+
+      async function deleteRow(rowIndex) {
+        // Implement row deletion logic here
+      }
+
+      // Load the API client and auth2 library
+      gapi.load("client:auth2", initClient);
+
+      function initClient() {
+        gapi.client
+          .init({
+            apiKey: API_KEY,
+            clientId: CLIENT_ID,
+            discoveryDocs: DISCOVERY_DOCS,
+            scope: SCOPES,
+          })
+          .then(
+            function () {
+              // Listen for sign-in state changes.
+              gapi.auth2
+                .getAuthInstance()
+                .isSignedIn.listen(updateSigninStatus);
+
+              // Handle the initial sign-in state.
+              updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+            },
+            function (error) {
+              console.log(JSON.stringify(error, null, 2));
+            }
+          );
+      }
+
+      function updateSigninStatus(isSignedIn) {
+        if (isSignedIn) {
+          listMajors();
+        }
+      }
+
+      function handleAuthClick(event) {
+        gapi.auth2.getAuthInstance().signIn();
+      }
+
+      function handleSignoutClick(event) {
+        gapi.auth2.getAuthInstance().signOut();
+      }
+
+      // Call this function to append a new row
+      function addTicketToSheet(name, contact, ticketHolder, amount, date) {
+        appendRow([name, contact, ticketHolder, amount, date]);
+      }
+
+      // Call this function to delete a row
+      function removeTicketFromSheet(rowIndex) {
+        deleteRow(rowIndex);
+      }
+
+      const { jsPDF } = window.jspdf;
+      let totalTickets = 0;
+      const ticketPrice = 350; // Fixed ticket price
+
+      document
+        .getElementById("ticketCount")
+        .addEventListener("input", function () {
+          const ticketCount = parseInt(this.value);
+          const amountPaid = ticketCount * ticketPrice;
+          document.getElementById("amountPaid").value = `₹${amountPaid.toFixed(
+            2
+          )}`;
+
+          const ticketNamesDiv = document.getElementById("ticketNames");
+          ticketNamesDiv.innerHTML = ""; // Clear previous inputs
+
+          if (ticketCount > 1) {
+            for (let i = 1; i <= ticketCount; i++) {
+              const input = document.createElement("input");
+              input.type = "text";
+              input.placeholder = `Name for Ticket ${i}`;
+              input.required = true;
+              ticketNamesDiv.appendChild(input);
+            }
+          }
+        });
+
+      document
+        .getElementById("ticketForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const name = document.getElementById("name").value;
+          const contact = document.getElementById("contact").value;
+          const ticketCount = parseInt(
+            document.getElementById("ticketCount").value
+          );
+          const amountPaid = ticketCount * ticketPrice; // Calculate based on ticket count
+          const eventDate = "31st May 2025";
+          const currentDate = new Date().toLocaleDateString("en-GB"); // dd/mm/yyyy format
+
+          const doc = new jsPDF({ orientation: "portrait" });
+
+          // Light Gradient Background from bottom to top
+          for (let i = 0; i <= 60; i++) {
+            const colorValue = 230 + i * 0.5; // Light gradient
+            doc.setFillColor(colorValue, colorValue, 255);
+            doc.rect(5, 5 + i * 4, 200, 4, "F");
+          }
+
+          // Broad Border for PDF Pages
+          doc.setDrawColor(42, 62, 80); // Dark color for border
+          doc.setLineWidth(1.5);
+          doc.rect(5, 5, 200, 287);
+
+          // Swaransh Musical Night Section
+          doc.setFillColor(42, 62, 80); // Dark color for header
+          doc.rect(5, 5, 200, 20, "F");
+          doc.setFontSize(18);
+          doc.setTextColor(255);
+          doc.text("🎻 Swaransh Musical Night", 105, 18, null, null, "center");
+
+          // Date above Ticket Details
+          doc.setFontSize(10);
+          doc.setTextColor(0);
+          doc.text(currentDate, 195, 30, null, null, "right");
+
+          // Ticket Details Section
+          doc.setFillColor(200, 220, 240); // Lighter shade for ticket details
+          doc.rect(5, 40, 200, 10, "F");
+          doc.setFontSize(16);
+          doc.setTextColor(0);
+          doc.text("Ticket Details", 105, 47, null, null, "center");
+
+          doc.setFontSize(12);
+          let yOffset = 60;
+          doc.text(`Total Tickets: ${ticketCount}`, 20, yOffset);
+          doc.text(`Total Amount: ₹${amountPaid.toFixed(2)}`, 20, yOffset + 10);
+          yOffset += 20;
+
+          // Table Headers
+          doc.text("Sr No", 20, yOffset);
+          doc.text("Ticket #", 50, yOffset);
+          doc.text("Name", 100, yOffset);
+          doc.text("Amount", 150, yOffset);
+          yOffset += 10;
+
+          const ticketNames = document.querySelectorAll("#ticketNames input");
+          for (let i = 1; i <= ticketCount; i++) {
+            if (yOffset > 270) {
+              doc.addPage();
+              yOffset = 20;
+              // Light Gradient Background for new page
+              for (let j = 0; j <= 60; j++) {
+                const colorValue = 230 + j * 0.5;
+                doc.setFillColor(colorValue, colorValue, 255);
+                doc.rect(5, 5 + j * 4, 200, 4, "F");
+              }
+              // Broad Border for new page
+              doc.setDrawColor(42, 62, 80);
+              doc.setLineWidth(1.5);
+              doc.rect(5, 5, 200, 287);
+            }
+            const ticketNumber = Math.floor(Math.random() * 100000);
+            const ticketName = ticketNames[i - 1]
+              ? ticketNames[i - 1].value
+              : name;
+            doc.text(`${i}`, 20, yOffset);
+            doc.text(`${ticketNumber}`, 50, yOffset);
+            doc.text(ticketName, 100, yOffset);
+            doc.text(`₹${ticketPrice.toFixed(2)}`, 150, yOffset);
+            yOffset += 10;
+          }
+
+          // Event Details Section
+          if (yOffset > 270) {
+            doc.addPage();
+            yOffset = 20;
+            // Light Gradient Background for new page
+            for (let j = 0; j <= 60; j++) {
+              const colorValue = 230 + j * 0.5;
+              doc.setFillColor(colorValue, colorValue, 255);
+              doc.rect(5, 5 + j * 4, 200, 4, "F");
+            }
+            // Broad Border for new page
+            doc.setDrawColor(42, 62, 80);
+            doc.setLineWidth(1.5);
+            doc.rect(5, 5, 200, 287);
+          }
+          doc.setFillColor(200, 220, 240); // Lighter shade for event details
+          doc.rect(5, yOffset + 5, 200, 10, "F");
+          doc.setFontSize(16);
+          doc.setTextColor(0);
+          doc.text("Event Details", 105, yOffset + 12, null, null, "center");
+
+          doc.setFontSize(12);
+          doc.text(`Event Date: ${eventDate}`, 20, yOffset + 25);
+          doc.text(`Time: 7.30 PM`, 20, yOffset + 35);
+          doc.text(
+            `Venue: Ravindra Natyamandir, Dadar, Mumbai`,
+            20,
+            yOffset + 45
+          );
+
+          // Quote
+          doc.setFontSize(12);
+          doc.setTextColor(84, 27, 0);
+          doc.text(
+            '"Music expresses that which cannot be said and on which it is impossible to be silent."',
+            105,
+            yOffset + 65,
+            null,
+            null,
+            "center"
+          );
+
+          // Organizers Section
+          doc.setFillColor(200, 220, 240); // Lighter shade for organizers
+          doc.rect(5, yOffset + 75, 200, 10, "F");
+          doc.setFontSize(16);
+          doc.setTextColor(0);
+          doc.text("Organizers", 105, yOffset + 82, null, null, "center");
+
+          const organizersText =
+            "Amey Gudhekar: 8850277332 | Ravi Chowekar: 964999089 | Parth Pingulkar: 9930866998 | Aryan Kambli: 9702409202 | Harshad Gawde: 7738791690";
+          doc.setFontSize(12);
+          doc.setTextColor(0);
+          doc.text(organizersText, 105, yOffset + 95, {
+            align: "center",
+            maxWidth: 170,
+          });
+
+          // Footer
+          doc.setFontSize(10);
+          doc.setTextColor(150);
+          doc.text(
+            "Please carry a valid ID proof.",
+            105,
+            yOffset + 110,
+            null,
+            null,
+            "center"
+          );
+
+          doc.save(`Tickets_${name}.pdf`);
+
+          const table = document
+            .getElementById("ticketTable")
+            .querySelector("tbody");
+
+          // Add each ticket holder to the table
+          ticketNames.forEach((input) => {
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+              <td>${name}</td>
+              <td>'${contact}'</td> <!-- Add single quotes to preserve formatting -->
+              <td>${input.value}</td>
+              <td>₹${ticketPrice.toFixed(2)}</td>
+              <td>'${currentDate}'</td> <!-- Add single quotes to preserve formatting -->
+              <td><button class="delete-btn" onclick="deleteRow(this)">Delete</button></td>
+            `;
+            // Add to Google Sheets
+            addTicketToSheet(
+              name,
+              contact,
+              input.value,
+              `₹${ticketPrice.toFixed(2)}`,
+              currentDate
+            );
+          });
+
+          totalTickets += ticketCount;
+          document.getElementById("totalTickets").textContent = totalTickets;
+        });
+
+      document
+        .getElementById("downloadPdf")
+        .addEventListener("click", function () {
+          const doc = new jsPDF({ orientation: "portrait" });
+
+          // Light Gradient Background for Buyer List PDF
+          for (let i = 0; i <= 60; i++) {
+            const colorValue = 240 + i * 0.25; // Slightly different light gradient
+            doc.setFillColor(colorValue, colorValue, 255);
+            doc.rect(5, 5 + i * 4, 200, 4, "F");
+          }
+
+          // Border for Buyer List PDF
+          doc.setDrawColor(60, 80, 100); // Different color for border
+          doc.setLineWidth(1.5);
+          doc.rect(5, 5, 200, 287);
+
+          doc.setFontSize(16);
+          doc.setTextColor(0);
+          doc.text("Buyer List", 105, 20, null, null, "center");
+
+          const table = document.getElementById("ticketTable");
+          const rows = table.querySelectorAll("tbody tr");
+
+          let yOffset = 40;
+          let totalTickets = 0;
+          let totalAmount = 0;
+          rows.forEach((row) => {
+            const cells = row.querySelectorAll("td");
+            totalTickets += 1; // Each row represents one ticket
+            totalAmount += parseFloat(
+              cells[3].textContent.replace("₹", "") || 0
+            );
+          });
+
+          doc.setFontSize(12);
+          doc.text(`Total Tickets: ${totalTickets}`, 20, yOffset);
+          doc.text(`Total Amount: ₹${totalAmount.toFixed(2)}`, 100, yOffset);
+
+          yOffset += 20;
+          doc.text("Buyer", 20, yOffset);
+          doc.text("Contact", 50, yOffset);
+          doc.text("Ticket Holder", 80, yOffset);
+          doc.text("Amount Paid", 110, yOffset);
+          doc.text("Date", 140, yOffset);
+
+          yOffset += 10;
+          rows.forEach((row) => {
+            if (yOffset > 270) {
+              doc.addPage();
+              yOffset = 20;
+              // Light Gradient Background for new page
+              for (let j = 0; j <= 60; j++) {
+                const colorValue = 240 + j * 0.25;
+                doc.setFillColor(colorValue, colorValue, 255);
+                doc.rect(5, 5 + j * 4, 200, 4, "F");
+              }
+              // Border for new page
+              doc.setDrawColor(60, 80, 100);
+              doc.setLineWidth(1.5);
+              doc.rect(5, 5, 200, 287);
+            }
+            const cells = row.querySelectorAll("td");
+            doc.text(cells[0].textContent, 20, yOffset);
+            doc.text(cells[1].textContent, 50, yOffset);
+            doc.text(cells[2].textContent, 80, yOffset);
+            doc.text(cells[3].textContent, 110, yOffset);
+            doc.text(cells[4].textContent, 140, yOffset);
+            yOffset += 10;
+          });
+
+          doc.save("Buyer_List.pdf");
+        });
+
+      document
+        .getElementById("downloadCsv")
+        .addEventListener("click", function () {
+          const table = document.getElementById("ticketTable");
+          const rows = table.querySelectorAll("tbody tr");
+          let csvContent = "data:text/csv;charset=utf-8,";
+
+          // Add headers
+          csvContent += "Buyer,Contact,Ticket Holder,Amount Paid,Date\n";
+
+          // Add rows
+          rows.forEach((row) => {
+            const cells = row.querySelectorAll("td");
+            const rowData = Array.from(cells)
+              .slice(0, -1)
+              .map((cell) => cell.textContent)
+              .join(","); // Exclude the last column (Delete button)
+            csvContent += rowData + "\n";
+          });
+
+          // Create a download link
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", "Buyer_List.csv");
+          document.body.appendChild(link);
+
+          // Trigger the download
+          link.click();
+
+          // Clean up
+          document.body.removeChild(link);
+        });
+
+      function deleteRow(button) {
+        const row = button.closest("tr");
+        totalTickets -= 1; // Each row represents one ticket
+        document.getElementById("totalTickets").textContent = totalTickets;
+        row.remove();
+        // Implement logic to remove from Google Sheets if needed
+      }
+    </script>
+  </body>
+</html>
